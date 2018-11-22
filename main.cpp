@@ -1,11 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm> // for sort()
 
 using namespace std;
 
 void readNums(ifstream &input, vector<int> &nums);
 void dynamicOpt(int capacity, vector<int> weights, vector<int> values);
+void greedyOpt(int capacity, vector<int> weights, vector<int> values);
 
 int main() {
 
@@ -60,9 +62,11 @@ int main() {
   readNums(valinput, values);
 
 
-  cout << "\nKnapsack capacity = " << capacity << ". Total number of items = " << values.size() << endl;
+  cout << "\nKnapsack capacity = " << capacity << ". Total number of items = " << values.size() << endl << endl;;
 
   dynamicOpt(capacity, weights, values);
+  cout << endl << endl;
+  greedyOpt(capacity, weights, values);
 
 
   return 0;
@@ -133,4 +137,77 @@ void dynamicOpt( int capacity, vector<int> weights, vector<int> values ) {
   cout << "Dynamic Programming Time Taken: " << (double)(finish-start)/CLOCKS_PER_SEC << endl;
 
 
+}
+
+
+void greedyOpt(int capacity, vector<int> weights, vector<int> values) {
+
+  double start = clock();
+
+  // Used index vector will mark which pairs have already been used when finding the best ratio
+  vector<bool> usedIndex;
+  usedIndex.resize(weights.size());
+
+  // This will store the index of the best ratios we find in their descending order
+  vector<int> optIndex;
+
+  float maxratio = -1;
+  int index = 0;
+
+  // Build descending order ratio list
+  while( optIndex.size() < values.size() ) { // While we have not looked through all the pairs
+
+    // Find best current max ratio
+    for( int i = 0; i < values.size(); i++ ) {
+
+      if( usedIndex[i] == false ) { // if we have not already used this pair 
+	float tmpratio = (float)values[i]/weights[i];
+	if( tmpratio > maxratio ) {
+	  maxratio = tmpratio;
+	  index = i;
+	}
+      }
+      // else, skip
+      
+    }
+
+    optIndex.push_back( index );
+    usedIndex[index] = true;
+
+    maxratio = -1; // reset maxratio
+    index = 0;     // reset index
+    
+
+  }
+
+
+  // Scan through our descending order ratio pairs and perform the greedy approach
+  int optvalue;
+  vector<int> optSubset;
+
+  for( int i = 0; i < optIndex.size(); i++ ) {
+
+    if( capacity - weights[ optIndex[i] ] >= 0 ) {
+      optSubset.push_back( optIndex[i] +1 );
+      optvalue += values[ optIndex[i] ];
+      capacity -= weights[ optIndex[i] ];
+    }
+    else // If we find an item that would take our knapsack over capacity, we quit
+      break;
+   
+  }
+  
+  sort(optSubset.begin(), optSubset.end());
+
+  double finish = clock();
+
+  cout << "Greedy Approach Optimal value: " << optvalue << endl;
+  cout << "Greedy Approach Optimal subset: {";
+  if( optSubset.size() > 0 )
+    cout << optSubset[0];
+  for( int i = 1; i < optSubset.size(); i++)
+    cout << ", " << optSubset[i];
+  cout << '}' << endl;
+  cout << "Greedy Approach Time Taken: " << (double)(finish-start)/CLOCKS_PER_SEC << endl;
+  
 }
