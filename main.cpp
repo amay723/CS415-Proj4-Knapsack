@@ -2,12 +2,13 @@
 #include <fstream>
 #include <vector>
 #include <algorithm> // for sort()
+#include <time.h>
 
 using namespace std;
 
 void readNums(ifstream &input, vector<int> &nums);
-void dynamicOpt(int capacity, vector<int> weights, vector<int> values);
-void greedyOpt(int capacity, vector<int> weights, vector<int> values);
+void dynamicOpt(int capacity, vector<int> weights, vector<int> values, ofstream & plots);
+void greedyOpt(int capacity, vector<int> weights, vector<int> values, ofstream & plots);
 
 int main() {
 
@@ -62,13 +63,18 @@ int main() {
   readNums(valinput, values);
 
 
-  cout << "\nKnapsack capacity = " << capacity << ". Total number of items = " << values.size() << endl << endl;;
+  cout << "\nKnapsack capacity = " << capacity << ". Total number of items = " << values.size() << endl << endl;
 
-  dynamicOpt(capacity, weights, values);
+  ofstream plots("plots.txt");
+
+  plots << values.size() << endl;
+  
+  dynamicOpt(capacity, weights, values, plots);
   cout << endl << endl;
-  greedyOpt(capacity, weights, values);
+  greedyOpt(capacity, weights, values, plots);
 
-
+  plots.close();
+  
   return 0;
 }
 
@@ -86,9 +92,9 @@ void readNums(ifstream &input, vector<int> & nums) {
 
 }
 
-void dynamicOpt( int capacity, vector<int> weights, vector<int> values ) {
+void dynamicOpt( int capacity, vector<int> weights, vector<int> values, ofstream & plots) {
 
-  double start = clock();
+  clock_t start = clock();
 
   int valueSize = values.size()+1;
   int capSize = capacity + 1;
@@ -125,7 +131,7 @@ void dynamicOpt( int capacity, vector<int> weights, vector<int> values ) {
       i--;    
   }
 
-  double finish = clock();
+  clock_t finish = clock();
   
   cout << "Dynamic Programming Optimal value: " << table[valueSize-1][capacity] << endl;
   cout << "Dynamic Programming Optimal subset: {";
@@ -134,15 +140,17 @@ void dynamicOpt( int capacity, vector<int> weights, vector<int> values ) {
   for( int i = optSubset.size()-2; i >= 0; i--)
     cout << ", " << optSubset[i];
   cout << '}' << endl;
-  cout << "Dynamic Programming Time Taken: " << (double)(finish-start)/CLOCKS_PER_SEC << endl;
 
+  printf("Dynamic Programming Time Taken: %.6fs\n", (double)(finish-start)/CLOCKS_PER_SEC);
+
+  plots << (double)(finish-start)/CLOCKS_PER_SEC << endl;
 
 }
 
 
-void greedyOpt(int capacity, vector<int> weights, vector<int> values) {
+void greedyOpt(int capacity, vector<int> weights, vector<int> values, ofstream & plots) {
 
-  double start = clock();
+  time_t start = clock();
 
   // Used index vector will mark which pairs have already been used when finding the best ratio
   vector<bool> usedIndex;
@@ -199,7 +207,7 @@ void greedyOpt(int capacity, vector<int> weights, vector<int> values) {
   
   sort(optSubset.begin(), optSubset.end());
 
-  double finish = clock();
+  time_t finish = clock();
 
   cout << "Greedy Approach Optimal value: " << optvalue << endl;
   cout << "Greedy Approach Optimal subset: {";
@@ -208,6 +216,8 @@ void greedyOpt(int capacity, vector<int> weights, vector<int> values) {
   for( int i = 1; i < optSubset.size(); i++)
     cout << ", " << optSubset[i];
   cout << '}' << endl;
-  cout << "Greedy Approach Time Taken: " << (double)(finish-start)/CLOCKS_PER_SEC << endl;
   
+  printf("Greedy Approach Time Taken: %.6fs\n", (double)(finish-start)/CLOCKS_PER_SEC);
+
+  plots << (double)(finish-start)/CLOCKS_PER_SEC << endl;
 }

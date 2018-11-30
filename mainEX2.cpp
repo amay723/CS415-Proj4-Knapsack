@@ -7,8 +7,8 @@
 using namespace std;
 
 void readNums(ifstream &input, vector<int> &nums);
-void dynamicOpt(int capacity, vector<int> weights, vector<int> values);
-void greedyOpt(int capacity, vector<int> weights, vector<int> values);
+void dynamicOpt(int capacity, vector<int> weights, vector<int> values, ofstream & plots);
+void greedyOpt(int capacity, vector<int> weights, vector<int> values, ofstream & plots);
 
 struct Node
 {
@@ -78,11 +78,15 @@ int main() {
   readNums(valinput, values);
 
 
-  cout << "\nKnapsack capacity = " << capacity << ". Total number of items = " << values.size() << endl << endl;;
+  cout << "\nKnapsack capacity = " << capacity << ". Total number of items = " << values.size() << endl << endl;
 
-  dynamicOpt(capacity, weights, values);
+  ofstream plots("plots.txt");
+
+  plots << values.size() << endl;
+
+  dynamicOpt(capacity, weights, values, plots);
   cout << endl << endl;
-  greedyOpt(capacity, weights, values);
+  greedyOpt(capacity, weights, values, plots);
 
 
   return 0;
@@ -102,7 +106,7 @@ void readNums(ifstream &input, vector<int> & nums) {
 
 }
 
-void dynamicOpt( int capacity, vector<int> weights, vector<int> values ) {
+void dynamicOpt( int capacity, vector<int> weights, vector<int> values, ofstream & plots ) {
 
   double start = clock();
 
@@ -125,6 +129,7 @@ void dynamicOpt( int capacity, vector<int> weights, vector<int> values ) {
 	table[i][j] = table[i-1][j];
     }
   }
+
 
 
   // backtrace
@@ -150,13 +155,16 @@ void dynamicOpt( int capacity, vector<int> weights, vector<int> values ) {
   for( int i = optSubset.size()-2; i >= 0; i--)
     cout << ", " << optSubset[i];
   cout << '}' << endl;
-  cout << "Dynamic Programming Time Taken: " << (double)(finish-start)/CLOCKS_PER_SEC << endl;
+
+  printf("Dynamic Programming Time Taken: %.6fs\n", (double)(finish-start)/CLOCKS_PER_SEC);
+
+  plots << (double)(finish-start)/CLOCKS_PER_SEC << endl;
 
 
 }
 
 
-void greedyOpt(int capacity, vector<int> weights, vector<int> values) {
+void greedyOpt(int capacity, vector<int> weights, vector<int> values, ofstream & plots) {
 
   double start = clock();
 
@@ -170,7 +178,7 @@ void greedyOpt(int capacity, vector<int> weights, vector<int> values) {
   
   // Scan through our descending order ratio pairs and perform the greedy approach
   int optvalue = 0;
-  vector<int> optSubset;
+  priority_queue<int, vector<int>, greater<int>> optSubset;
 
   while( ! q.empty() ) {
 
@@ -181,23 +189,31 @@ void greedyOpt(int capacity, vector<int> weights, vector<int> values) {
     if( capacity - temp->weight < 0 )
       break;
 
-    optSubset.push_back( temp->index );
+    optSubset.push( temp->index );
     optvalue += temp->value;
     capacity -= temp->weight;
+
+    delete temp;
     
   }
   
-  sort(optSubset.begin(), optSubset.end());
 
   double finish = clock();
 
   cout << "Greedy Approach Optimal value: " << optvalue << endl;
   cout << "Greedy Approach Optimal subset: {";
-  if( optSubset.size() > 0 )
-    cout << optSubset[0];
-  for( int i = 1; i < optSubset.size(); i++)
-    cout << ", " << optSubset[i];
+  if( optSubset.size() > 0 ) {
+    cout << optSubset.top();
+    optSubset.pop();
+  }
+  while( ! optSubset.empty() ) {
+    cout << ", " << optSubset.top();
+    optSubset.pop();
+  }
   cout << '}' << endl;
-  cout << "Greedy Approach Time Taken: " << (double)(finish-start)/CLOCKS_PER_SEC << endl;
+  
+  printf("Greedy Approach Time Taken: %.6fs\n", (double)(finish-start)/CLOCKS_PER_SEC);
+
+  plots << (double)(finish-start)/CLOCKS_PER_SEC << endl;
   
 }
