@@ -22,7 +22,7 @@ Dynamic Programming space O(2W) mainEX1.cpp: We were able to construct the optim
 algorithm by using a table with only 2 rows. Since in the normal algorithm we only need to use two rows at once 
 while building the table while we are scanning down the table. We used this same idea to calculate optimal value. 
 We were not able to figure out the backtracking to find the optimal subset in this case. In our testing (using 
-the files, lcapacity.txt, largew.txt, largev.txt) we noticed that the original algorithm could use up to almost
+the files, p09_c.txt, p09_w.txt, p09_v.txt) we noticed that the original algorithm could use up to almost
 4 GB of RAM during runtime, and depending on the hardware specs this could cause the program to fail. In our 
 modified version that uses O(2W) space, we saw that at most the program used 1.4 MB of RAM, and even finished 
 a few seconds quicker than the unaltered version, though that is most likely due to not implimenting backtracking. 
